@@ -16,7 +16,8 @@ class User:
             "_id": uuid.uuid4().hex,
             "name": request.form.get('name'),
             "email": request.form.get('email'),
-            "password": request.form.get('password')
+            "password": request.form.get('password'),
+            "img_name": request.form.get('img_name')
         }
 
         #encrypt the password

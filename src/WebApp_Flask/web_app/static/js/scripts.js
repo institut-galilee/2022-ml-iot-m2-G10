@@ -39,3 +39,7 @@ $("form[name=login_form").submit(function(e){
 
     e.preventDefault();
 });
+
+function affectPath(nom_image){
+    document.getElementById("img_name").value = nom_image; 
+}

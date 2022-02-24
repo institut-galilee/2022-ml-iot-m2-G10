@@ -34,8 +34,10 @@
                 <input type="password" name="password" class="field" required>
 
                 <label for="file">Face photo</label><br/>
-                <input type="file" name="inputFile" required>
-                
+                <input type="file" name="inputFile" onchange="affectPath(this.files[0].name)"/>
+
+                <input id="img_name" type="text"  name="img_name" class="field" style="display:none">
+
                 <hr/>
                 <p class="error error--hidden"></p>
 
