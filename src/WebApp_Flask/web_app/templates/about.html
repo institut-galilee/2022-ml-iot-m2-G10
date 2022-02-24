@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+    
+            <header class="header sticky-top" >
+                <nav class="navbar navbar-expand-lg navbar-light bg-white py-3 shadow-sm" id="nav1">
+                    <div class="container"><a class="navbar-brand" href="#">
+                        <strong class="h5 mb-0 font-weight-bold"><!-- ICON - <i class=""></i> --> Exam monitoring system</strong></a>
+                        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+                        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                            <ul class="navbar-nav ml-auto">
+                                <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                                <li class="nav-item"><a class="nav-link" href="/about/">About</a></li>
+                               
+                            </ul>
+                        </div>
+                        <a class="nav-link" href="/login/">Log in</a>
+                    </div>
+                </nav>
+                </header>
+            <div class="container" style="margin-top: 4%;">
+                <div class="row  justify-content-center">
+                    <h2 class="text-center" id="titre_projet"> Projet IOT & ML </h1>
+                </div>
+                <div class="row justify-content-center" id="text_info">
+                            <p class="text-center font-weight-bold">Dans le cadre d'un cours de Machine Learning & IoT, nous avons réalisé un projet 
+                                de surveillance d'examen.<br> Ce projet a été réalisé par Traian BATOG (traianbatog@yahoo.com) et Aghilas KESSAÏ (aghilaskessai@yahoo.com) à l'Université Sorbonne Paris Nord 
+                                encadré par Aomar OSMANI et Massinissa HAMIDI. Pour en savoir plus, vous pouvez consulter la <a href="https://github.com/institut-galilee" target="_blank" class="link-primary">page Github</a> 
+                                du cours d'IOT avec tous les projets réalisés par les étudiants. <br> <br>
+                                <u> Les outils et les technologies utilisées : </u>
+                                <ul>
+                                    <li>Web : Javascript, HTML, CSS, Bootsrap, Flask, Jquery, MongoDB </li>
+                                    <li>Communications entre les téléphones et le PC: Sockets </li>
+                                    <li>Application Android : Java, XML </li>
+                                    <li>Modèles : Python (sci-kit) </li>
+                                </ul> 
+                        </p>
+                </div>
+            </div>
+       
+{% endblock content %}
