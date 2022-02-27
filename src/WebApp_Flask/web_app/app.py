@@ -17,12 +17,37 @@ from random import random
 from sklearn.neighbors import KNeighborsClassifier as knc
 from sklearn.model_selection import train_test_split
 from sklearn import metrics
+import speech_recognition
+import pyttsx3
+import threading
+
 
 from flask_socketio import SocketIO,send
 
-# pour savoir si les tels sont connectés
+# Global variables for fraud detection
+fraud_cam_web = False
+fraud_cam_phone = False
+fraud_voice = False
+
+# Recognizer for the speech detection during the exam
+recognizer = speech_recognition.Recognizer()
+
+# Tell which phones are connected
 teles_conn =[]
 info_tel ="nn_conns"
+
+# Include the object detection model
+net = cv2.dnn.readNet("dnn_model/yolov4-tiny.weights", "dnn_model/yolov4-tiny.cfg")
+model = cv2.dnn_DetectionModel(net)
+model.setInputParams(size=(320, 320), scale = 1/255)
+
+# Load the class list
+classes = []
+with open("dnn_model/classes.txt", "r") as file_object:
+    for class_name in file_object.readlines():
+        class_name = class_name.strip()
+        classes.append(class_name)
+
 # Known face encodings and names
 known_face_encodings = []
 known_face_names = []
@@ -40,7 +65,11 @@ process_this_frame = True
 ##################################################################################
 
 app = Flask(__name__)
+# First camera
 camera = cv2.VideoCapture(0)
+# Second camera
+cap = cv2.VideoCapture("http://192.168.137.100:8080/video")
+app.secret_key = b'\xe7\xcfc\x11\x1cCQ\xa2a\x8ckX$\xaa\xc2_'
 app.secret_key = b'\xe7\xcfc\x11\x1cCQ\xa2a\x8ckX$\xaa\xc2_'
 #Database
 client = pymongo.MongoClient('localhost', 27017)
@@ -48,7 +77,6 @@ db = client.user_login_system
 
 
 ## Creation de la socket 
-
 
 #variables for info on connected phones
 
@@ -127,6 +155,8 @@ def home_page():
 
 @app.route('/exam/')
 def exam_page():
+    voice_thread = threading.Thread(target=det_voice, name="Downloader")
+    voice_thread.start()
     return render_template('exam.html')
 
 executor = Executor(app)
@@ -161,6 +191,11 @@ def about():
 def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+@app.route('/video_feed_obj')
+def video_feed_obj():
+    return Response(det_objects(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
 @app.route('/phones_co')
 def phones_co():
     global tel_conns
@@ -172,12 +207,33 @@ def phones_co():
         return jsonify(teles_conn)
 
 
-
 @app.route('/bool_phones_co')
 def bool_phones_co():
         return jsonify(tel_conns)
 
+@app.route('/fraud_cam_web')
+def fraud_cam_web():
+    if(fraud_cam_web==True):
+        return jsonify("Webcam fraud detected")
+    else:
+        return jsonify(" ")
+
+@app.route('/fraud_cam_phone')
+def fraud_cam_phone():
+    if(fraud_cam_phone==True):
+        return jsonify("Camera fraud detected")
+    else:
+        return jsonify(" ")
+
+@app.route('/fraud_voice')
+def fraud_voice():
+    if(fraud_voice==True):
+        return jsonify("Voice fraud detected")
+    else:
+        return jsonify(" ")
+
 def gen_frames():
+    global fraud_cam_web
     while True:
         success, frame = camera.read() # read the camera
         if not success:
@@ -224,4 +280,55 @@ def gen_frames():
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
                    b'Content-type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+            if 'unknown' in face_names:
+                break
+    fraud_cam_web = True
+    camera.release()
+    cv2.destroyAllWindows()
 
+def det_objects():
+    global fraud_cam_phone
+    fpsLimit = 1
+    startTime = time.time()
+    while True:
+        # Get the frames
+        success, frame = cap.read()
+        nowTime = time.time()
+        if(int(nowTime - startTime)) > fpsLimit:
+            if not success:
+                break
+            else:
+                # Object detection
+                small_frame = cv2.resize(frame, (0, 0), fx=0.25,  fy=0.25)
+                (class_ids, scores, bboxes) = model.detect(small_frame)
+                for class_id, score, bbox in zip(class_ids, scores, bboxes):
+                    (x, y, w, h) = bbox
+                    class_name = classes[class_id]
+                    cv2.putText(small_frame, class_name, (x, y - 5), cv2.FONT_HERSHEY_PLAIN, 1, (200, 0, 50), 2)
+                    cv2.rectangle(small_frame, (x, y), (x+w, y+h), (200, 0, 50), 3)
+                ret, buffer = cv2.imencode('.jpeg', small_frame)
+                frame = buffer.tobytes()
+                yield (b'--frame\r\n'
+                    b'Content-type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+            startTime = time.time()
+
+def det_voice():
+    global fraud_voice
+    global recognizer
+    while True:
+        try:
+            with speech_recognition.Microphone() as mic:
+                recognizer.adjust_for_ambient_noise(mic, duration =0.5)
+                audio = recognizer.listen(mic)
+
+                text = recognizer.recognize_google(audio)
+                text = text.lower()
+
+                if text:
+                    print("Detected human speech")
+                    fraud_voice = True
+                    break
+
+        except speech_recognition.UnknownValueError:
+            recognizer = speech_recognition.Recognizer()
+            continue

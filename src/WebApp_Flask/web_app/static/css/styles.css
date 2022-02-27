@@ -375,3 +375,47 @@ input[type=submit] {
     color: #fff;
     background: none;
 }
+
+/* Exam styles */
+.header--container{
+  height:30%;
+  width:100%;
+  display: flex;
+  flex-direction: row;
+}
+
+.error--container{
+  height:100%;
+  width:60%;
+}
+
+.camera--container{
+  height:100%;
+  width:40%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+
+.exam--container{
+  height:70%;
+  width:100%;
+}
+
+.exam--form{
+  width:80%;
+  height:100%;
+  margin: auto;
+  padding-top: 5%;
+}
+.exam--form h4{
+  margin-left: 15%;
+}
+
+.camera--div{
+  height:100%;
+  margin-right:5%;
+  border: 2px solid gray;
+  box-shadow: 0 8px 26px -4px rgba(0,0,0,0.15);
+  border-radius: 5px;
+}

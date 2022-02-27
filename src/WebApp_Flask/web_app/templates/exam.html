@@ -1,29 +1,84 @@
 {% extends "base.html" %}
 
 {% block content %}
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script>
+function detect_fraud_cam_web() {
+    $.ajax({
+        url: '/fraud_cam_web',
+        success: function(data) {
+            console.log(data);
+            $("#fraud_cam_web_detected").text(data)
+        },complete:function(){
+            setTimeout(detect_fraud_cam_web, 1000);
+        }
+    });
+}
+function detect_fraud_cam_phone() {
+    $.ajax({
+        url: '/fraud_cam_phone',
+        success: function(data) {
+            console.log(data);
+            $("#fraud_cam_phone_detected").text(data)
+        },complete:function(){
+            setTimeout(detect_fraud_cam_phone, 1000);
+        }
+    });
+}
+function detect_fraud_voice() {
+    $.ajax({
+        url: '/fraud_voice',
+        success: function(data) {
+            console.log(data);
+            $("#fraud_voice_detected").text(data)
+        },complete:function(){
+            setTimeout(detect_fraud_voice, 1000);
+        }
+    });
+}
 
-    <div class="card-wrapper">
-        <div class="card">
-            <h1 class = "center">Dashboard</h1>
-            <p class="center">You are currently logged in.</p>
+$(document).ready(function() {
+// run the first time; all subsequent calls will take care of themselves
+setTimeout(detect_fraud_cam_web, 1000);
+});
 
-            <div class="center">
-                <a href="/user/signout" class="btn btn--secondary">Sign Out</a>
-            </div>
+$(document).ready(function() {
+// run the first time; all subsequent calls will take care of themselves
+setTimeout(detect_fraud_cam_phone, 1000);
+});
+
+$(document).ready(function() {
+// run the first time; all subsequent calls will take care of themselves
+setTimeout(detect_fraud_voice, 1000);
+});
+
+</script>
+<div style="height:100vh">
+    <div class="header--container">
+        <div class="error--container">
+            <p id = "fraud_cam_phone_detected"></p>
+            <p id = "fraud_cam_web_detected"></p>
+            <p id = "fraud_voice_detected"></p>
         </div>
-
-        <div class="card">
-            <h1 class = "center">Your info</h1>
-            <p>
-                <strong>ID:</strong> {{ session['user']['_id']}}<br>
-                <strong>Name:</strong> {{ session['user']['name']}}<br>
-                <strong>Email:</strong> {{ session['user']['email']}}<br>
-            </p>
-        </div>
-        <div class="card">
-            <h1 class = "center">Webcam Stream</h1>
-            <img src ="{{ url_for('video_feed') }}" width = "100%">
+        <div class = "camera--container">
+            <div class = "camera--div"><img src ="{{ url_for('video_feed') }}" height="100%"></div>
+            <div class = "camera--div"><img src ="{{ url_for('video_feed_obj') }}" height="100%"></div>
         </div>
     </div>
-
-{% endblock %}
+    <div class = "exam--container">
+        <div class = "exam--form">
+            <h5 class = "center">If the k parameter in knn is 6 then how many apples have fallen on the ground in the last 3.6 seconds?</h6>
+            <h4>
+            <input type="radio" id="A" name="exam">
+            <label for ="A"> (A) 51 </label><br/>
+            <input type="radio" id="B" name="exam">
+            <label for ="A"> (B) 2 </label><br/>
+            <input type="radio" id="C" name="exam">
+            <label for ="A"> (C) 0 </label><br/>
+            <input type="radio" id="D" name="exam">
+            <label for ="A"> (D) 7.3 </label><br/>
+            </h4>
+        </div>
+    </div>
+</div>
+{% endblock content %}
