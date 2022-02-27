@@ -1,7 +1,51 @@
 {% extends "base.html" %}
 
 {% block content %}
+        
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
 
+        function afficher_info(){
+            alert("Veuillez connecter les 2 téléphones avant de commencer");
+        }
+        function ouvrir_examen(){
+            location.href = "/exam";
+        }
+        function verifier_tel() {
+            $.ajax({
+                url: '/phones_co',
+                success: function(data) {
+                    console.log(data);           
+                    //$("#tel_co").text('Téléphone(s) connecté(s):'+data)
+                    $("#tel_co").html('Téléphone(s) connecté(s):'+"<br/>"+data)
+                },complete:function(){
+                    setTimeout(verifier_tel, 2000);
+                }
+            });
+           
+        }
+        function verifier_tel_bool() {
+            $.ajax({
+                url: '/bool_phones_co',
+                success: function(data) {
+                    console.log(data+'on est dans verifier_tel_bool');           
+                    //$("#tel_co").text('Téléphone(s) connecté(s):'+data)
+                    if(data == "conns"){
+                        document.getElementById("btn_debut").onclick = ouvrir_examen;
+                    }
+                },complete:function(){
+                    setTimeout(verifier_tel_bool, 2000);
+                }
+            });
+           
+        }
+        
+        $(document).ready(function() {
+            // run the first time; all subsequent calls will take care of themselves
+            setTimeout(verifier_tel, 1000);
+            setTimeout(verifier_tel_bool, 1000);
+        });
+    </script>
     <div class="card-wrapper">
         <div class="card">
             <h1 class = "center">Dashboard</h1>
@@ -20,9 +64,12 @@
                 <strong>Email:</strong> {{ session['user']['email']}}<br>
             </p>
         </div>
+        
         <div class="card">
-            <h1 class = "center">Webcam Stream</h1>
-            <img src ="{{ url_for('video_feed') }}" width = "100%">
+            <h1 class = "center">L'examen n'a pas encore débuté...</h1>
+            <p id="tel_co"> Téléphone(s) connecté(s) : <br> {{info}}.</p>
+            <!-- <a  href="../exam" class="btn btn--primary" disabled> Commencer l'examen</a> -->
+            <input id="btn_debut" type="button" onclick="afficher_info()" value="Commencer l'examen"/>
         </div>
     </div>
 

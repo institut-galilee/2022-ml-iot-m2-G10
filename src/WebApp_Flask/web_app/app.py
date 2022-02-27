@@ -1,12 +1,28 @@
 from cv2 import imshow
-from flask import Flask, render_template, session, redirect, Response
+from flask import Flask, render_template, session, redirect, Response,request,json,jsonify
 from functools import wraps
 import pymongo
 import cv2
 import face_recognition
 import numpy as np
 import time
+from flask_executor import Executor
+import struct
+import socket
+import os
+from _thread import *
+import numpy as np 
+import pandas as pd
+from random import random
+from sklearn.neighbors import KNeighborsClassifier as knc
+from sklearn.model_selection import train_test_split
+from sklearn import metrics
 
+from flask_socketio import SocketIO,send
+
+# pour savoir si les tels sont connectés
+teles_conn =[]
+info_tel ="nn_conns"
 # Known face encodings and names
 known_face_encodings = []
 known_face_names = []
@@ -30,9 +46,65 @@ app.secret_key = b'\xe7\xcfc\x11\x1cCQ\xa2a\x8ckX$\xaa\xc2_'
 client = pymongo.MongoClient('localhost', 27017)
 db = client.user_login_system
 
+
+## Creation de la socket 
+
+
+#variables for info on connected phones
+
+info = "Aucun téléphone connecté pour l instant"
+tel_conns = "non"
+##### 
 UPLOAD_FOLDER = 'static/img'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+
+def message_recu(data):
+    if(len(teles_conn) <2):
+        if(data == 'STARTED_HEAD'):
+            teles_conn.append('Le téléphone de la tête est connecté\n')
+        if(data == 'STARTED_ARM'):
+            teles_conn.append('Le téléphone du bras est connecté\n')    
+
+def lancer_socket():
+
+    nb_max_connex = 5
+    port=12343
+    s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    IP = '0.0.0.0'
+    s.bind((IP,port))
+    s.listen(nb_max_connex)
+
+    print(f"Le serveur est lancé sur {IP} sur le port {port}.")
+    return s
+
+#pour les clients multiples
+
+def threaded_client(connexion):
+    connexion.send("Connecté au système.\r\n".encode("UTF-8"))
+    
+    while True:
+        data = connexion.recv(2048).decode()
+        message_recu(data)
+        print(data)
+        connexion.send("Données reçues.\r\n".encode("UTF-8"))
+        if not data:
+            break
+       
+    connexion.close()
+
+def accepter_msg(socket):
+    print('avant while')
+    while True:
+        print('dans while true')
+        Client, addresse = socket.accept()
+        print('Connecté à: ' + addresse[0] + ':' + str(addresse[1]))
+        start_new_thread(threaded_client, (Client, ))
+        
+
+#on lance le serveur
+
+
 
 # Decorators
 def login_required(f):
@@ -53,6 +125,11 @@ from user import routes
 def home_page():
     return render_template('home.html')
 
+@app.route('/exam/')
+def exam_page():
+    return render_template('exam.html')
+
+executor = Executor(app)
 @app.route('/dashboard/')
 @login_required
 def dashboard_page():
@@ -63,7 +140,10 @@ def dashboard_page():
     user_face_encoding = face_recognition.face_encodings(user_image)[0]
     known_face_encodings = [user_face_encoding]
     known_face_names = [session['user']['name']]
-    return render_template('dashboard.html')
+    s = lancer_socket()
+    executor.submit(accepter_msg,s)
+    #accepter_msg(s)
+    return render_template('dashboard.html',info = info,tel_conns=tel_conns)
 
 @app.route('/signup/')
 def signup_page():
@@ -80,6 +160,22 @@ def about():
 @app.route('/video_feed')
 def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/phones_co')
+def phones_co():
+    global tel_conns
+    if(len(teles_conn)==2):
+        tel_conns="conns"
+    if(len(teles_conn)==0):
+        return jsonify("Aucun téléphone connecté")
+    else:
+        return jsonify(teles_conn)
+
+
+
+@app.route('/bool_phones_co')
+def bool_phones_co():
+        return jsonify(tel_conns)
 
 def gen_frames():
     while True:
