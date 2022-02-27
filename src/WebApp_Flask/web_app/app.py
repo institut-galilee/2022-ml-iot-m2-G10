@@ -68,7 +68,7 @@ app = Flask(__name__)
 # First camera
 camera = cv2.VideoCapture(0)
 # Second camera
-cap = cv2.VideoCapture("http://192.168.137.100:8080/video")
+#cap = cv2.VideoCapture("http://192.168.137.100:8080/video")
 app.secret_key = b'\xe7\xcfc\x11\x1cCQ\xa2a\x8ckX$\xaa\xc2_'
 app.secret_key = b'\xe7\xcfc\x11\x1cCQ\xa2a\x8ckX$\xaa\xc2_'
 #Database
@@ -214,23 +214,23 @@ def bool_phones_co():
 @app.route('/fraud_cam_web')
 def fraud_cam_web():
     if(fraud_cam_web==True):
-        return jsonify("Webcam fraud detected")
+        return jsonify("Webcam activity: Fraud detected")
     else:
-        return jsonify(" ")
+        return jsonify("Webcam activity: Normal")
 
 @app.route('/fraud_cam_phone')
 def fraud_cam_phone():
     if(fraud_cam_phone==True):
-        return jsonify("Camera fraud detected")
+        return jsonify("Camera activity: Fraud detected")
     else:
-        return jsonify(" ")
+        return jsonify("Camera activity: Normal")
 
 @app.route('/fraud_voice')
 def fraud_voice():
     if(fraud_voice==True):
-        return jsonify("Voice fraud detected")
+        return jsonify("Voice activity: Fraud detected")
     else:
-        return jsonify(" ")
+        return jsonify("Voice activity: Normal")
 
 def gen_frames():
     global fraud_cam_web

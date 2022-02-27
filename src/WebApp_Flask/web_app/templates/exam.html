@@ -56,28 +56,34 @@ setTimeout(detect_fraud_voice, 1000);
 <div style="height:100vh">
     <div class="header--container">
         <div class="error--container">
+            <h3 class="center">Exam Status</h3>
+            <hr/>
             <p id = "fraud_cam_phone_detected"></p>
             <p id = "fraud_cam_web_detected"></p>
             <p id = "fraud_voice_detected"></p>
         </div>
+        <div class="blank--stuff"></div>
         <div class = "camera--container">
             <div class = "camera--div"><img src ="{{ url_for('video_feed') }}" height="100%"></div>
-            <div class = "camera--div"><img src ="{{ url_for('video_feed_obj') }}" height="100%"></div>
+            <div class = "camera--div"><img src ="{{ url_for('video_feed') }}" height="100%"></div>
         </div>
     </div>
     <div class = "exam--container">
         <div class = "exam--form">
             <h5 class = "center">If the k parameter in knn is 6 then how many apples have fallen on the ground in the last 3.6 seconds?</h6>
+            <hr/>
             <h4>
             <input type="radio" id="A" name="exam">
-            <label for ="A"> (A) 51 </label><br/>
+            <label for ="A"> (A) Around 51 because newton's law </label><br/>
             <input type="radio" id="B" name="exam">
-            <label for ="A"> (B) 2 </label><br/>
+            <label for ="A"> (B) 2 exactly because it rained 2 days ago </label><br/>
             <input type="radio" id="C" name="exam">
-            <label for ="A"> (C) 0 </label><br/>
+            <label for ="A"> (C) 9 just because </label><br/>
             <input type="radio" id="D" name="exam">
-            <label for ="A"> (D) 7.3 </label><br/>
+            <label for ="A"> (D) ran out of ideas </label><br/>
             </h4>
+            <hr/>
+            <input class="btn--centered" id="btn_debut" type="button" value="Submit"/>
         </div>
     </div>
 </div>

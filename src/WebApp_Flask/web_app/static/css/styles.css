@@ -112,7 +112,7 @@ label {
 /* Cards */
 .card-wrapper {
   margin: 0 auto;
-  padding: 90px 30px;
+  padding: 30px 30px;
   flex-wrap: wrap;
   justify-content: center;
   display: flex;
@@ -386,7 +386,24 @@ input[type=submit] {
 
 .error--container{
   height:100%;
-  width:60%;
+  width:20%;
+  background-color: white;
+  box-shadow: 0 8px 26px -4px rgba(0,0,0,0.15);
+  border-radius: 5px;
+  border:1px solid black;
+  margin-left:5%;
+  padding-top:5px;
+  margin-top:5px;
+  margin-bottom: 5px;
+}
+
+.error--container p{
+  margin-left:10px;
+  font-weight: bold;
+}
+
+.error--container hr{
+  width:80%;
 }
 
 .camera--container{
@@ -395,6 +412,13 @@ input[type=submit] {
   display: flex;
   flex-direction: row;
   justify-content: space-evenly;
+  padding-top:5px;
+  padding-bottom:5px;
+}
+
+.blank--stuff{
+  width:30%;
+  height:100%;
 }
 
 .exam--container{
@@ -403,19 +427,38 @@ input[type=submit] {
 }
 
 .exam--form{
-  width:80%;
-  height:100%;
+  box-shadow: 0 8px 26px -4px rgba(0,0,0,0.15);
+  border:1px solid black;
+  border-radius: 5px;
+  background: var(--white);
+  width:75%;
+  height:75%;
+  padding-top: 1.5%;
   margin: auto;
-  padding-top: 5%;
+  margin-top: 3%;
 }
 .exam--form h4{
   margin-left: 15%;
 }
 
+.exam--form hr{
+  width:80%;
+  border:1px solid black;
+}
+
+.exam--form label{
+  color: black;
+}
+
+.btn--centered{
+  display:block;
+  margin:auto;
+}
+
 .camera--div{
   height:100%;
   margin-right:5%;
-  border: 2px solid gray;
+  border: 2px solid rgb(102, 102, 102);
   box-shadow: 0 8px 26px -4px rgba(0,0,0,0.15);
   border-radius: 5px;
 }
