@@ -28,7 +28,7 @@ from flask_socketio import SocketIO,send
 fraud_cam_web = False
 fraud_cam_phone = False
 fraud_voice = False
-
+fraud_arms = "Arm activity cheating level :"
 # Recognizer for the speech detection during the exam
 recognizer = speech_recognition.Recognizer()
 
@@ -68,7 +68,10 @@ app = Flask(__name__)
 # First camera
 camera = cv2.VideoCapture(0)
 # Second camera
+
 #cap = cv2.VideoCapture("http://192.168.137.100:8080/video")
+
+
 app.secret_key = b'\xe7\xcfc\x11\x1cCQ\xa2a\x8ckX$\xaa\xc2_'
 app.secret_key = b'\xe7\xcfc\x11\x1cCQ\xa2a\x8ckX$\xaa\xc2_'
 #Database
@@ -87,17 +90,97 @@ UPLOAD_FOLDER = 'static/img'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
+
+
+## verifier les donnees 
+
+def verifier_data(data):
+    global fraud_arms
+    if((data.partition('\n')[0])=='Bras'):
+        
+        df = data.split("\n",1)[1]
+        df = (df.split(" "))
+        
+        ndf = np.empty(0)
+        for el in df:
+            el = el.split("\n")
+            for e in el:
+                ndf = np.append(ndf,float(e))
+        ndf = np.reshape(ndf,(10,3))
+        print(ndf)
+        knc = classification_triche(dfg)
+
+        knc.fit(X_train, y_train.values.ravel())
+
+        y_pred = knc.predict(ndf)
+        print(y_pred)
+        nb =  np.count_nonzero(y_pred == 1)
+        nb=nb*10
+        fraud_arms = "Arm activity cheating level :" + str(nb) + '%'
+        
+        return ndf
+### generer le dataset 
+
+def generer_dataset_bras():
+    X = np.random.uniform(0.1,15,1000)
+    Y = np.random.uniform(0.1,15,1000)
+    Z = np.random.uniform(0.0,15,1000)
+    df = pd.DataFrame({'X':X,'Y':Y,'Z':Z})
+    
+    #suppositions de triche, si il y a une acceleration supérieure a 3.5 m/s le long de x et y
+    # ou si la somme de x+y+z dépasse 25
+    df['CHEAT'] = np.where(   ((df['X']> 3.5) & (df['Y']> 1.5)) | ( (df['X']+df['Y']+df['Z']) > 30)  ,1,0)
+    return df
+
+def classification_triche(df):
+    knv = knc(n_neighbors=3)
+    X = df.drop(columns=['CHEAT'])
+    y = df.drop(columns=['X','Y','Z'])
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=42)
+    knv.fit(X_train, y_train.values.ravel())
+    y_pred_knv = knv.predict(X_test)
+    score = metrics.accuracy_score(y_test, y_pred_knv)*100
+    print(f'Pour le Kneighbors Classifier le score est de : {score}%.')
+    return knv
+
+dfg = generer_dataset_bras()
+
+#knc = knc(n_neighbors=3)
+X = dfg.drop(columns=['CHEAT'])
+y = dfg.drop(columns=['X','Y','Z'])
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=42)
+
+
+
+
+
+
+print('Voici le dataset généré: \n\n',dfg)
+nb_triche = dfg['CHEAT'].value_counts()[1]
+nb_nn_triche =  dfg['CHEAT'].value_counts()[0]
+nb_data = dfg['CHEAT'].count()
+print(f'Sur le dataframe généré, on a {nb_triche}/{nb_data} cas de triche et {nb_nn_triche}/{nb_data} de cas de non triche.')
+
+
 def message_recu(data):
+    global fraud_arms
+    if(data):
+        if(data[0] == 'B'):
+            print('Données de bras reçu')
+            ndf = verifier_data(data)
+            
+            print(type(ndf))
+
     if(len(teles_conn) <2):
         if(data == 'STARTED_HEAD'):
             teles_conn.append('Le téléphone de la tête est connecté\n')
         if(data == 'STARTED_ARM'):
             teles_conn.append('Le téléphone du bras est connecté\n')    
 
-def lancer_socket():
+def lancer_socket(p):
 
     nb_max_connex = 5
-    port=12343
+    port=p
     s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     IP = '0.0.0.0'
     s.bind((IP,port))
@@ -106,30 +189,36 @@ def lancer_socket():
     print(f"Le serveur est lancé sur {IP} sur le port {port}.")
     return s
 
+
 #pour les clients multiples
 
 def threaded_client(connexion):
-    connexion.send("Connecté au système.\r\n".encode("UTF-8"))
+    #connexion.send("Connecté au système.\r\n".encode("UTF-8"))
     
     while True:
         data = connexion.recv(2048).decode()
         message_recu(data)
         print(data)
-        connexion.send("Données reçues.\r\n".encode("UTF-8"))
+        
+        #connexion.send("Données reçues.\r\n".encode("UTF-8"))
         if not data:
             break
        
     connexion.close()
 
 def accepter_msg(socket):
-    print('avant while')
+    
     while True:
-        print('dans while true')
+        print('accepte les connexions...')
         Client, addresse = socket.accept()
         print('Connecté à: ' + addresse[0] + ':' + str(addresse[1]))
         start_new_thread(threaded_client, (Client, ))
-        
 
+executor = Executor(app)
+'''s = lancer_socket(12343)
+def accepter(s):    
+    executor.submit(accepter_msg,s)
+accepter(s)'''
 #on lance le serveur
 
 
@@ -157,9 +246,12 @@ def home_page():
 def exam_page():
     voice_thread = threading.Thread(target=det_voice, name="Downloader")
     voice_thread.start()
+    #s.close()
+    #s = lancer_socket(12344)
+    #executor.submit(accepter_msg,s)
     return render_template('exam.html')
 
-executor = Executor(app)
+
 @app.route('/dashboard/')
 @login_required
 def dashboard_page():
@@ -170,7 +262,7 @@ def dashboard_page():
     user_face_encoding = face_recognition.face_encodings(user_image)[0]
     known_face_encodings = [user_face_encoding]
     known_face_names = [session['user']['name']]
-    s = lancer_socket()
+    s = lancer_socket(12343)
     executor.submit(accepter_msg,s)
     #accepter_msg(s)
     return render_template('dashboard.html',info = info,tel_conns=tel_conns)
@@ -224,6 +316,15 @@ def fraud_cam_phone():
         return jsonify("Camera activity: Fraud detected")
     else:
         return jsonify("Camera activity: Normal")
+
+@app.route('/fraud_arm')
+def fraud_arm():
+    '''if(fraud_arms==True):
+        return jsonify("Arm activity: Fraud detected")
+    else:
+        return jsonify("Arm activity: Normal")'''
+    return jsonify(fraud_arms)
+
 
 @app.route('/fraud_voice')
 def fraud_voice():
