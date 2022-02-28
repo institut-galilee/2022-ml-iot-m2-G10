@@ -68,12 +68,9 @@ app = Flask(__name__)
 # First camera
 camera = cv2.VideoCapture(0)
 # Second camera
-
-#cap = cv2.VideoCapture("http://192.168.137.100:8080/video")
-
-
+cap = cv2.VideoCapture("http://192.168.137.10:8080/video")
 app.secret_key = b'\xe7\xcfc\x11\x1cCQ\xa2a\x8ckX$\xaa\xc2_'
-app.secret_key = b'\xe7\xcfc\x11\x1cCQ\xa2a\x8ckX$\xaa\xc2_'
+
 #Database
 client = pymongo.MongoClient('localhost', 27017)
 db = client.user_login_system
@@ -389,29 +386,32 @@ def gen_frames():
 
 def det_objects():
     global fraud_cam_phone
-    fpsLimit = 1
-    startTime = time.time()
+    global class_name
+    global classes
     while True:
         # Get the frames
         success, frame = cap.read()
         nowTime = time.time()
-        if(int(nowTime - startTime)) > fpsLimit:
-            if not success:
+        if not success:
+            break
+        else:
+            # Object detection
+            small_frame = cv2.resize(frame, (0, 0), fx=0.25,  fy=0.25)
+            (class_ids, scores, bboxes) = model.detect(small_frame)
+            for class_id, score, bbox in zip(class_ids, scores, bboxes):
+                (x, y, w, h) = bbox
+                class_name = classes[class_id]
+                cv2.putText(small_frame, class_name, (x, y - 5), cv2.FONT_HERSHEY_PLAIN, 1, (200, 0, 50), 2)
+                cv2.rectangle(small_frame, (x, y), (x+w, y+h), (200, 0, 50), 3)
+            ret, buffer = cv2.imencode('.jpeg', small_frame)
+            frame = buffer.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+            if ("cell phone" in class_name) or ("backpack" in class_name):
                 break
-            else:
-                # Object detection
-                small_frame = cv2.resize(frame, (0, 0), fx=0.25,  fy=0.25)
-                (class_ids, scores, bboxes) = model.detect(small_frame)
-                for class_id, score, bbox in zip(class_ids, scores, bboxes):
-                    (x, y, w, h) = bbox
-                    class_name = classes[class_id]
-                    cv2.putText(small_frame, class_name, (x, y - 5), cv2.FONT_HERSHEY_PLAIN, 1, (200, 0, 50), 2)
-                    cv2.rectangle(small_frame, (x, y), (x+w, y+h), (200, 0, 50), 3)
-                ret, buffer = cv2.imencode('.jpeg', small_frame)
-                frame = buffer.tobytes()
-                yield (b'--frame\r\n'
-                    b'Content-type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-            startTime = time.time()
+    fraud_cam_phone = True
+    cap.release()
+    cv2.destroyAllWindows()
 
 def det_voice():
     global fraud_voice
