@@ -37,6 +37,18 @@ function detect_fraud_voice() {
     });
 }
 
+function detect_fraud_arms() {
+    $.ajax({
+        url: '/fraud_arm',
+        success: function(data) {
+            console.log(data);
+            $("#fraud_arms_detected").text(data)
+        },complete:function(){
+            setTimeout(detect_fraud_arms, 1000);
+        }
+    });
+}
+
 $(document).ready(function() {
 // run the first time; all subsequent calls will take care of themselves
 setTimeout(detect_fraud_cam_web, 1000);
@@ -52,6 +64,10 @@ $(document).ready(function() {
 setTimeout(detect_fraud_voice, 1000);
 });
 
+$(document).ready(function() {
+// run the first time; all subsequent calls will take care of themselves
+setTimeout(detect_fraud_arms, 1000);
+});
 </script>
 <div style="height:100vh">
     <div class="header--container">
@@ -61,6 +77,7 @@ setTimeout(detect_fraud_voice, 1000);
             <p id = "fraud_cam_phone_detected"></p>
             <p id = "fraud_cam_web_detected"></p>
             <p id = "fraud_voice_detected"></p>
+            <p id = "fraud_arms_detected"></p>
         </div>
         <div class="blank--stuff"></div>
         <div class = "camera--container">
@@ -68,7 +85,7 @@ setTimeout(detect_fraud_voice, 1000);
             <div class = "camera--div"><img src ="{{ url_for('video_feed_obj') }}" height="100%"></div>
         </div>
     </div>
-    <div class = "exam--container">
+    <div id ="exam_contain" class = "exam--container">
         <div class = "exam--form">
             <h5 class = "center">If the k parameter in knn is 6 then how many apples have fallen on the ground in the last 3.6 seconds?</h6>
             <hr/>
