@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">Examonitor</string>
+    <string name="titre_app">Système de surveillance d\'examen</string>
+    <string name="titre_realisation">Système réalisé par :  <br /> Traian Batog et Aghilas Kessaï  <br />
+        - M2 EID² USPN - </string>
+    <string name="text_introduction">Vous allez participer à un examen en ligne surveillé par un système informatique. Merci de bien vouloir configurer votre téléphone en choisissant son emplacement.</string>
+    <string name="text_emplacement">Emplacement du téléphone</string>
+    <string name="text_btn_bras">Bras (2) </string>
+    <string name="text_btn_tete">Tête (3) </string>
+    <string name="text_info_bras">Merci de bien vouloir placer votre téléphone sur votre bras avant de débuter l\'examen</string>
+    <string name="info_btn_debut_exambras">Débuter l\'examen</string>
+    <string name="text_info_capteur">L\'examen est en cours...</string>
+    <string name="info_systeme">Aucune information à signaler</string>
+    <string name="title_activity_head_screen">Head_screen</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="information_tel_tet">Merci de bien vouloir placer le téléphone sur votre tête.</string>
+</resources>
