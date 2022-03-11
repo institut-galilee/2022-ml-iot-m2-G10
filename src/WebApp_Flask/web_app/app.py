@@ -10,6 +10,7 @@ from flask_executor import Executor
 import struct
 import socket
 import os
+import os.path
 from _thread import *
 import numpy as np 
 import pandas as pd
@@ -69,13 +70,16 @@ app = Flask(__name__)
 # First camera
 camera = cv2.VideoCapture(0)
 # Second camera
-cap = cv2.VideoCapture("http://192.168.137.43:8080/video")
+cap = cv2.VideoCapture("http://192.168.1.133:8080/video")
 app.secret_key = b'\xe7\xcfc\x11\x1cCQ\xa2a\x8ckX$\xaa\xc2_'
 
 #Database
 client = pymongo.MongoClient('localhost', 27017)
 db = client.user_login_system
 
+file_exists = os.path.exists('fraud/log.txt')
+if(file_exists):
+    os.remove("fraud/log.txt")
 
 ## Creation de la socket 
 
@@ -92,7 +96,7 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 ## verifier les donnees 
 
-def verifier_data(data):
+def detect_cheat_arm(data):
     global fraud_arms
     if((data.partition('\n')[0])=='Bras'):
         
@@ -114,6 +118,12 @@ def verifier_data(data):
         print(y_pred)
         nb =  np.count_nonzero(y_pred == 1)
         nb=nb*10
+        snb = str(nb)
+        file = open('fraud/log.txt', 'a+')
+        now = datetime.now()
+        dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+        file.write(f"Arm activity detected at  {dt_string} with {snb}% cheating level. \n")
+        file.close()
         fraud_arms = "Arm activity cheating level :" + str(nb) + '%'
         
         return ndf
@@ -165,7 +175,7 @@ def message_recu(data):
     if(data):
         if(data[0] == 'B'):
             print('Données de bras reçu')
-            ndf = verifier_data(data)
+            ndf = detect_cheat_arm(data)
             
             print(type(ndf))
 

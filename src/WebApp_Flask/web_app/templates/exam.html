@@ -3,6 +3,12 @@
 {% block content %}
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script>
+
+
+function finExam() {
+  alert("L'examen est terminé.");
+}
+
 function detect_fraud_cam_web() {
     $.ajax({
         url: '/fraud_cam_web',
@@ -86,7 +92,7 @@ setTimeout(detect_fraud_arms, 1000);
         </div>
     </div>
     <div id ="exam_contain" class = "exam--container">
-        <div class = "exam--form">
+        <div class = "exam--form text-center">
             <h5 class = "center">If the k parameter in knn is 6 then how many apples have fallen on the ground in the last 3.6 seconds?</h6>
             <hr/>
             <h4>
@@ -100,7 +106,9 @@ setTimeout(detect_fraud_arms, 1000);
             <label for ="A"> (D) ran out of ideas </label><br/>
             </h4>
             <hr/>
-            <input class="btn--centered" id="btn_debut" type="button" value="Submit"/>
+           <!-- <input class="btn--centered" id="btn_debut" type="button" value="Submit"/> -->
+
+            <button class="btn btn-primary btn--centered"  id="btn_debut" onclick="finExam()">Submit</button>
         </div>
     </div>
 </div>
