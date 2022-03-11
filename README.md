@@ -1,5 +1,7 @@
 # 2021-ExamMonitoringSystem
 
+
+Vidéo du projet : https://www.youtube.com/watch?v=ZQbcUqdNra4
 <p align="center">
     <img src="doc/img/ExamMonitoringSystem_minimal_configuration.png" width="700px" alt="ExamMonitoringSystem_minimal_configuration">
 </p>
