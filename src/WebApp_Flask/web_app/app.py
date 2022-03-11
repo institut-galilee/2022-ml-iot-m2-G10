@@ -20,6 +20,7 @@ from sklearn import metrics
 import speech_recognition
 import pyttsx3
 import threading
+from datetime import datetime
 
 
 from flask_socketio import SocketIO,send
@@ -378,6 +379,11 @@ def gen_frames():
             yield (b'--frame\r\n'
                    b'Content-type: image/jpeg\r\n\r\n' + frame + b'\r\n')
             if 'unknown' in face_names:
+                file = open('fraud/log.txt', 'a+')
+                now = datetime.now()
+                dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+                file.write(f"Unknown person detected at {dt_string}. \n")
+                file.close()
                 break
     fraud_cam_web = True
     camera.release()
@@ -406,7 +412,12 @@ def det_objects():
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
                    b'Content-type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-            if ("cell phone" in class_name) or ("backpack" in class_name):
+            if ("cell phone" in class_name) or ("backpack" in class_name) or ("person" in class_name):
+                file = open('fraud/log.txt', 'a+')
+                now = datetime.now()
+                dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+                file.write(f"Prohibited object detected at {dt_string}. \n")
+                file.close()
                 break
     fraud_cam_phone = True
     cap.release()
@@ -427,6 +438,11 @@ def det_voice():
                 if text:
                     print("Detected human speech")
                     fraud_voice = True
+                    file = open('fraud/log.txt', 'a+')
+                    now = datetime.now()
+                    dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+                    file.write(f"Detected voice activity at {dt_string}. \n")
+                    file.close()
                     break
 
         except speech_recognition.UnknownValueError:
